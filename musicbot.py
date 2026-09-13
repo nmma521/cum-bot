@@ -89,9 +89,25 @@ class MusicBot(commands.Cog):
         self.queue = []
         self.current_song = None
 
+    # def extract_info(self, query):
+    #     with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
+    #         return ydl.extract_info(query, download=False)
+
     def extract_info(self, query):
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-            return ydl.extract_info(query, download=False)
+            info = ydl.extract_info(query, download=False)
+
+            if info and info.get("url"):
+                cookies = ydl.cookiejar.get_cookies_for_url(info["url"])
+
+                info["_ffmpeg_cookies"] = "\n".join(
+                    f"{cookie.name}={cookie.value}; "
+                    f"path={cookie.path or '/'}; "
+                    f"domain={cookie.domain};"
+                    for cookie in cookies
+                )
+
+            return info
 
 
     @commands.command()
