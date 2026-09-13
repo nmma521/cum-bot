@@ -13,6 +13,7 @@ import random
 
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
+from yt_dlp.utils import DownloadError
 
 load_dotenv()
 
@@ -187,31 +188,63 @@ class MusicBot(commands.Cog):
 
         if not voice_client:
             return
-        if self.queue:
+        while self.queue:
             # pops value and extracts url and title
             item = self.queue.pop(0)
 
-            if item["type"] == "spotify":
-                youtube_item = await self.spotify_to_youtube(item)
+            try:
 
-                if not youtube_item:
-                    await ctx.send(
-                        f"Couldn't find **{item['artist']} - {item['title']}** on YouTube."
+                if item["type"] == "spotify":
+                    youtube_item = await asyncio.wait_for(
+                        self.spotify_to_youtube(item),
+                        timeout=20
                     )
-                    return await self.play_next(ctx)
 
-                item = youtube_item
+                    if not youtube_item:
+                        await ctx.send(
+                            f"Couldn't find **{item['artist']} - {item['title']}** on YouTube."
+                        )
+                        return await self.play_next(ctx)
 
-            url = item["source"]
-            title = item["title"]
+                    item = youtube_item
 
-            self.current_song = title
+                url = item["source"]
+                title = item["title"]
 
-            info = await asyncio.to_thread(
-                self.extract_info,
-                url
-            )
-            stream_url = info["url"]
+                self.current_song = title
+
+                info = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        self.extract_info,
+                        url
+                    ),
+                    timeout=20
+                )
+
+                stream_url = info["url"]
+
+
+            # stupid ahh error
+
+            except asyncio.TimeoutError:
+                await ctx.send(
+                    f"Timed out loading **{item.get('title', 'a song')}**. Skipping."
+                )
+                continue
+
+            except DownloadError:
+                await ctx.send(
+                    f"Couldn't load **{item.get('title', 'a song')}**. It may be age-restricted, private, or unavailable. Skipping."
+                )
+                continue
+
+            except Exception as e:
+                print(f"Error loading song: {repr(e)}")
+
+                await ctx.send(
+                    f"Error loading **{item.get('title', 'a song')}**. Skipping."
+                )
+                continue
 
             # source = await discord.FFmpegOpus.from_url(url, **FFMPEG_OPTIONS)
             source = discord.FFmpegOpusAudio(
@@ -228,12 +261,21 @@ class MusicBot(commands.Cog):
                     self.client.loop
                 )
 
+
+
             voice_client.play(source, after=after_playing)
+
+            self.current_song = title
 
             await ctx.send(f"Now playing **{title}**")
 
-        elif not voice_client.is_playing():
-            self.current_song = None
+            # found a song so can kill the loop
+
+            return
+
+        self.current_song = None
+
+        if not voice_client.is_playing():
             await ctx.send("queue empty")
 
     @commands.command()
