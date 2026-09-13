@@ -58,17 +58,17 @@ FFMPEG_OPTIONS = {
 POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
 
 youtube_args = {
-    "player_client": ["mweb"]
+    "player_client": ["tv_embedded", "web_embedded"]
 }
 
 extractor_args = {
     "youtube": youtube_args
 }
 
-if POT_PROVIDER_URL:
-    extractor_args["youtubepot-bgutilhttp"] = {
-        "base_url": [POT_PROVIDER_URL]
-    }
+# if POT_PROVIDER_URL:
+#     extractor_args["youtubepot-bgutilhttp"] = {
+#         "base_url": [POT_PROVIDER_URL]
+#     }
 
 YDL_OPTIONS = {
     "format": "bestaudio",
