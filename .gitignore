@@ -2,3 +2,4 @@
 .spotify_cache
 .venv/
 __pycache__/
+youtube_cookies.txt
