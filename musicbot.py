@@ -36,10 +36,15 @@ cookie_data = os.getenv("YOUTUBE_COOKIES")
 COOKIE_PATH = None
 
 if cookie_data:
+    # Railway
     COOKIE_PATH = "/tmp/youtube_cookies.txt"
 
     with open(COOKIE_PATH, "w", encoding="utf-8", newline="\n") as file:
         file.write(cookie_data)
+
+elif os.path.exists("youtube_cookies.txt"):
+    # Local development
+    COOKIE_PATH = "youtube_cookies.txt"
 
 FFMPEG_OPTIONS = {
     "before_options": (
