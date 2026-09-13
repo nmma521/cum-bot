@@ -31,7 +31,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
 
-cookie_data = os.getenv("COOKIE_DATA")
+cookie_data = os.getenv("YOUTUBE_COOKIES")
 
 COOKIE_PATH = None
 
@@ -72,6 +72,8 @@ class MusicBot(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, search):
         print(f"play command received: {search}")
+
+        print("YouTube cookies loaded:", bool(cookie_data))
 
         voice_channel = ctx.author.voice.channel if ctx.author.voice else None
         if not voice_channel:
@@ -238,7 +240,7 @@ class MusicBot(commands.Cog):
 
                 http_headers = info.get("http_headers", {})
 
-                print("HTTP HEADERS HERE: " + info.get("http_headers"))
+                print("HTTP HEADERS HERE:", info.get("http_headers"))
 
                 header_string = "".join(
                     f"{key}: {value}\r\n"
