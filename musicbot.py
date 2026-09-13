@@ -50,6 +50,11 @@ FFMPEG_OPTIONS = {
     ),
     "options": "-vn"
 }
+POT_PROVIDER_URL = os.getenv(
+    "POT_PROVIDER_URL",
+    "http://127.0.0.1:4416"
+)
+
 YDL_OPTIONS = {
     "format": "bestaudio",
     "noplaylist": False,
@@ -58,9 +63,7 @@ YDL_OPTIONS = {
             "player_client": ["mweb"]
         },
         "youtubepot-bgutilhttp": {
-            "base_url": [
-                "http://pot-provider.railway.internal:4416"
-            ]
+            "base_url": [POT_PROVIDER_URL]
         }
     },
     "js_runtimes": {
@@ -68,6 +71,7 @@ YDL_OPTIONS = {
     },
     "verbose": True
 }
+
 if COOKIE_PATH:
     YDL_OPTIONS["cookiefile"] = COOKIE_PATH
 
