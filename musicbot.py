@@ -58,17 +58,17 @@ FFMPEG_OPTIONS = {
 POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
 
 youtube_args = {
-    "player_client": ["tv_embedded", "web_embedded"]
+    "player_client": ["mweb"]
 }
 
 extractor_args = {
     "youtube": youtube_args
 }
 
-# if POT_PROVIDER_URL:
-#     extractor_args["youtubepot-bgutilhttp"] = {
-#         "base_url": [POT_PROVIDER_URL]
-#     }
+if POT_PROVIDER_URL:
+    extractor_args["youtubepot-bgutilhttp"] = {
+        "base_url": [POT_PROVIDER_URL]
+    }
 
 YDL_OPTIONS = {
     "format": "bestaudio",
@@ -264,21 +264,44 @@ class MusicBot(commands.Cog):
                 stream_url = info["url"]
 
                 http_headers = info.get("http_headers", {})
-
-                print("HTTP HEADERS HERE:", info.get("http_headers"))
+                ffmpeg_cookies = info.get("_ffmpeg_cookies", "")
 
                 header_string = "".join(
                     f"{key}: {value}\r\n"
                     for key, value in http_headers.items()
                 )
 
+                before_options = (
+                        FFMPEG_OPTIONS["before_options"] +
+                        f' -headers "{header_string}"'
+                )
+
+                if ffmpeg_cookies:
+                    before_options += f' -cookies "{ffmpeg_cookies}"'
+
                 ffmpeg_options = {
-                    "before_options": (
-                            FFMPEG_OPTIONS["before_options"] +
-                            f' -headers "{header_string}"'
-                    ),
+                    "before_options": before_options,
                     "options": FFMPEG_OPTIONS["options"]
                 }
+
+                # stream_url = info["url"]
+                #
+                # http_headers = info.get("http_headers", {})
+                #
+                # print("HTTP HEADERS HERE:", info.get("http_headers"))
+                #
+                # header_string = "".join(
+                #     f"{key}: {value}\r\n"
+                #     for key, value in http_headers.items()
+                # )
+                #
+                # ffmpeg_options = {
+                #     "before_options": (
+                #             FFMPEG_OPTIONS["before_options"] +
+                #             f' -headers "{header_string}"'
+                #     ),
+                #     "options": FFMPEG_OPTIONS["options"]
+                # }
 
 
             # stupid ahh error
