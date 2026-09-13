@@ -50,22 +50,25 @@ FFMPEG_OPTIONS = {
     ),
     "options": "-vn"
 }
-POT_PROVIDER_URL = os.getenv(
-    "POT_PROVIDER_URL",
-    "http://127.0.0.1:4416"
-)
+POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
+
+youtube_args = {
+    "player_client": ["mweb"]
+}
+
+extractor_args = {
+    "youtube": youtube_args
+}
+
+if POT_PROVIDER_URL:
+    extractor_args["youtubepot-bgutilhttp"] = {
+        "base_url": [POT_PROVIDER_URL]
+    }
 
 YDL_OPTIONS = {
     "format": "bestaudio",
     "noplaylist": False,
-    "extractor_args": {
-        "youtube": {
-            "player_client": ["mweb"]
-        },
-        "youtubepot-bgutilhttp": {
-            "base_url": [POT_PROVIDER_URL]
-        }
-    },
+    "extractor_args": extractor_args,
     "js_runtimes": {
         "node": {}
     },
