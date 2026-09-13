@@ -31,6 +31,16 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
 
+cookie_data = os.getenv("COOKIE_DATA")
+
+COOKIE_PATH = None
+
+if cookie_data:
+    COOKIE_PATH = "/tmp/youtube_cookies.txt"
+
+    with open(COOKIE_PATH, "w", encoding="utf-8", newline="\n") as file:
+        file.write(cookie_data)
+
 FFMPEG_OPTIONS = {
     "before_options": (
         "-reconnect 1 "
@@ -44,6 +54,9 @@ YDL_OPTIONS = {
     "format": "bestaudio",
     "noplaylist": False
 }
+
+if COOKIE_PATH:
+    YDL_OPTIONS["cookiefile"] = COOKIE_PATH
 
 class MusicBot(commands.Cog):
     def __init__(self, client):
