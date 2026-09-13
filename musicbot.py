@@ -236,6 +236,21 @@ class MusicBot(commands.Cog):
 
                 stream_url = info["url"]
 
+                http_headers = info.get("http_headers", {})
+
+                header_string = "".join(
+                    f"{key}: {value}\r\n"
+                    for key, value in http_headers.items()
+                )
+
+                ffmpeg_options = {
+                    "before_options": (
+                            FFMPEG_OPTIONS["before_options"] +
+                            f' -headers "{header_string}"'
+                    ),
+                    "options": FFMPEG_OPTIONS["options"]
+                }
+
 
             # stupid ahh error
 
@@ -262,7 +277,7 @@ class MusicBot(commands.Cog):
             # source = await discord.FFmpegOpus.from_url(url, **FFMPEG_OPTIONS)
             source = discord.FFmpegOpusAudio(
                 stream_url,
-                **FFMPEG_OPTIONS
+                **ffmpeg_options
             )
 
             def after_playing(error):
