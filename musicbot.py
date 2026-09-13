@@ -238,6 +238,8 @@ class MusicBot(commands.Cog):
 
                 http_headers = info.get("http_headers", {})
 
+                print("HTTP HEADERS HERE: " + info.get("http_headers"))
+
                 header_string = "".join(
                     f"{key}: {value}\r\n"
                     for key, value in http_headers.items()
