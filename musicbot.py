@@ -31,20 +31,15 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
 
-cookie_data = os.getenv("YOUTUBE_COOKIES")
+cookie_data = os.getenv("COOKIE_DATA")
 
 COOKIE_PATH = None
 
 if cookie_data:
-    # Railway
     COOKIE_PATH = "/tmp/youtube_cookies.txt"
 
     with open(COOKIE_PATH, "w", encoding="utf-8", newline="\n") as file:
         file.write(cookie_data)
-
-elif os.path.exists("youtube_cookies.txt"):
-    # Local development
-    COOKIE_PATH = "youtube_cookies.txt"
 
 FFMPEG_OPTIONS = {
     "before_options": (
@@ -55,29 +50,9 @@ FFMPEG_OPTIONS = {
     ),
     "options": "-vn"
 }
-POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
-
-youtube_args = {
-    "player_client": ["mweb"]
-}
-
-extractor_args = {
-    "youtube": youtube_args
-}
-
-if POT_PROVIDER_URL:
-    extractor_args["youtubepot-bgutilhttp"] = {
-        "base_url": [POT_PROVIDER_URL]
-    }
-
 YDL_OPTIONS = {
     "format": "bestaudio",
-    "noplaylist": False,
-    "extractor_args": extractor_args,
-    "js_runtimes": {
-        "node": {}
-    },
-    "verbose": True
+    "noplaylist": False
 }
 
 if COOKIE_PATH:
@@ -89,32 +64,14 @@ class MusicBot(commands.Cog):
         self.queue = []
         self.current_song = None
 
-    # def extract_info(self, query):
-    #     with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-    #         return ydl.extract_info(query, download=False)
-
     def extract_info(self, query):
         with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
-            info = ydl.extract_info(query, download=False)
-
-            if info and info.get("url"):
-                cookies = ydl.cookiejar.get_cookies_for_url(info["url"])
-
-                info["_ffmpeg_cookies"] = "\n".join(
-                    f"{cookie.name}={cookie.value}; "
-                    f"path={cookie.path or '/'}; "
-                    f"domain={cookie.domain};"
-                    for cookie in cookies
-                )
-
-            return info
+            return ydl.extract_info(query, download=False)
 
 
     @commands.command()
     async def play(self, ctx, *, search):
         print(f"play command received: {search}")
-
-        print("YouTube cookies loaded:", bool(cookie_data))
 
         voice_channel = ctx.author.voice.channel if ctx.author.voice else None
         if not voice_channel:
@@ -280,44 +237,19 @@ class MusicBot(commands.Cog):
                 stream_url = info["url"]
 
                 http_headers = info.get("http_headers", {})
-                ffmpeg_cookies = info.get("_ffmpeg_cookies", "")
 
                 header_string = "".join(
                     f"{key}: {value}\r\n"
                     for key, value in http_headers.items()
                 )
 
-                before_options = (
-                        FFMPEG_OPTIONS["before_options"] +
-                        f' -headers "{header_string}"'
-                )
-
-                if ffmpeg_cookies:
-                    before_options += f' -cookies "{ffmpeg_cookies}"'
-
                 ffmpeg_options = {
-                    "before_options": before_options,
+                    "before_options": (
+                            FFMPEG_OPTIONS["before_options"] +
+                            f' -headers "{header_string}"'
+                    ),
                     "options": FFMPEG_OPTIONS["options"]
                 }
-
-                # stream_url = info["url"]
-                #
-                # http_headers = info.get("http_headers", {})
-                #
-                # print("HTTP HEADERS HERE:", info.get("http_headers"))
-                #
-                # header_string = "".join(
-                #     f"{key}: {value}\r\n"
-                #     for key, value in http_headers.items()
-                # )
-                #
-                # ffmpeg_options = {
-                #     "before_options": (
-                #             FFMPEG_OPTIONS["before_options"] +
-                #             f' -headers "{header_string}"'
-                #     ),
-                #     "options": FFMPEG_OPTIONS["options"]
-                # }
 
 
             # stupid ahh error
@@ -600,4 +532,3 @@ async def main():
     await client.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
-
