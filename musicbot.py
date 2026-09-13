@@ -52,7 +52,13 @@ FFMPEG_OPTIONS = {
 }
 YDL_OPTIONS = {
     "format": "bestaudio",
-    "noplaylist": False
+    "noplaylist": False,
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["default", "web_embedded"]
+        }
+    },
+    "verbose": True
 }
 
 if COOKIE_PATH:
