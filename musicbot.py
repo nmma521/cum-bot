@@ -58,6 +58,9 @@ YDL_OPTIONS = {
             "player_client": ["default", "web_embedded"]
         }
     },
+    "js_runtimes": {
+        "node": {}
+    },
     "verbose": True
 }
 
