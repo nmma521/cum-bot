@@ -55,7 +55,12 @@ YDL_OPTIONS = {
     "noplaylist": False,
     "extractor_args": {
         "youtube": {
-            "player_client": ["default", "web_embedded"]
+            "player_client": ["mweb"]
+        },
+        "youtubepot-bgutilhttp": {
+            "base_url": [
+                "http://pot-provider.railway.internal:4416"
+            ]
         }
     },
     "js_runtimes": {
@@ -63,7 +68,6 @@ YDL_OPTIONS = {
     },
     "verbose": True
 }
-
 if COOKIE_PATH:
     YDL_OPTIONS["cookiefile"] = COOKIE_PATH
 
