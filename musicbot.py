@@ -55,30 +55,40 @@ FFMPEG_OPTIONS = {
     ),
     "options": "-vn"
 }
-POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
+IS_RAILWAY = bool(os.getenv("RAILWAY_ENVIRONMENT"))
 
-youtube_args = {
-    "player_client": ["mweb"]
-}
+if IS_RAILWAY:
+    POT_PROVIDER_URL = os.getenv("POT_PROVIDER_URL")
 
-extractor_args = {
-    "youtube": youtube_args
-}
-
-if POT_PROVIDER_URL:
-    extractor_args["youtubepot-bgutilhttp"] = {
-        "base_url": [POT_PROVIDER_URL]
+    extractor_args = {
+        "youtube": {
+            "player_client": ["mweb"]
+        }
     }
 
-YDL_OPTIONS = {
-    "format": "bestaudio",
-    "noplaylist": False,
-    "extractor_args": extractor_args,
-    "js_runtimes": {
-        "node": {}
-    },
-    "verbose": True
-}
+    if POT_PROVIDER_URL:
+        extractor_args["youtubepot-bgutilhttp"] = {
+            "base_url": [POT_PROVIDER_URL]
+        }
+
+    YDL_OPTIONS = {
+        "format": "bestaudio",
+        "noplaylist": False,
+        "extractor_args": extractor_args,
+        "js_runtimes": {
+            "node": {}
+        },
+        "verbose": True
+    }
+
+    if COOKIE_PATH:
+        YDL_OPTIONS["cookiefile"] = COOKIE_PATH
+
+else:
+    YDL_OPTIONS = {
+        "format": "bestaudio",
+        "noplaylist": False
+    }
 
 if COOKIE_PATH:
     YDL_OPTIONS["cookiefile"] = COOKIE_PATH
